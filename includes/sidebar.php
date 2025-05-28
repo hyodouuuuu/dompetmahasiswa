@@ -88,6 +88,9 @@
             background: #435ebe;
             color: white;
             font-family: Arial, sans-serif;
+            position: fixed;
+            left: 0;
+            top: 0;
         }
 
         .sidebar-header {
@@ -153,6 +156,7 @@
 
         .dropdown-toggle {
             justify-content: space-between;
+            width: 100%;
         }
 
         .dropdown-icon {
@@ -167,17 +171,15 @@
         }
 
         .dropdown-menu {
+            display: none;
             list-style: none;
             padding: 0;
             margin: 0;
             background: rgba(0,0,0,0.1);
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.3s ease;
         }
 
         .dropdown-parent.active .dropdown-menu {
-            max-height: 500px;
+            display: block;
         }
 
         .submenu-item {
@@ -218,6 +220,7 @@
             .sidebar {
                 width: 100%;
                 height: auto;
+                position: relative;
             }
         }
     </style>
@@ -230,58 +233,33 @@
             dropdownToggles.forEach(function(toggle) {
                 toggle.addEventListener('click', function(e) {
                     e.preventDefault();
-                    e.stopPropagation();
-                    
                     const parentLi = this.closest('.dropdown-parent');
-                    const isActive = parentLi.classList.contains('active');
                     
-                    // Close all other dropdowns
+                    // Toggle current dropdown
+                    parentLi.classList.toggle('active');
+                    
+                    // Optional: Close other dropdowns
                     document.querySelectorAll('.dropdown-parent').forEach(function(item) {
                         if (item !== parentLi) {
                             item.classList.remove('active');
                         }
                     });
-                    
-                    // Toggle current dropdown
-                    parentLi.classList.toggle('active', !isActive);
                 });
             });
 
-            // Handle submenu clicks
-            const submenuLinks = document.querySelectorAll('.submenu-link');
-            submenuLinks.forEach(function(link) {
-                link.addEventListener('click', function(e) {
-                    // Remove active class from all submenu items
-                    document.querySelectorAll('.submenu-item').forEach(function(item) {
-                        item.classList.remove('active');
-                    });
-                    
-                    // Add active class to clicked submenu item
-                    this.closest('.submenu-item').classList.add('active');
-                });
-            });
-
-            // Close dropdown when clicking outside
-            document.addEventListener('click', function(e) {
-                if (!e.target.closest('.dropdown-parent')) {
-                    document.querySelectorAll('.dropdown-parent').forEach(function(item) {
-                        item.classList.remove('active');
-                    });
+            // Set active state based on current URL
+            const currentPath = window.location.pathname;
+            const allLinks = document.querySelectorAll('.sidebar-link, .submenu-link');
+            
+            allLinks.forEach(link => {
+                if (link.getAttribute('href') === currentPath.split('/').pop()) {
+                    link.closest('.sidebar-item')?.classList.add('active');
+                    // If it's a submenu item, also activate the parent dropdown
+                    const dropdownParent = link.closest('.dropdown-parent');
+                    if (dropdownParent) {
+                        dropdownParent.classList.add('active');
+                    }
                 }
-            });
-
-            // Handle regular sidebar links
-            const sidebarLinks = document.querySelectorAll('.sidebar-link:not(.dropdown-toggle)');
-            sidebarLinks.forEach(function(link) {
-                link.addEventListener('click', function() {
-                    // Remove active class from all sidebar items
-                    document.querySelectorAll('.sidebar-item').forEach(function(item) {
-                        item.classList.remove('active');
-                    });
-                    
-                    // Add active class to clicked item
-                    this.closest('.sidebar-item').classList.add('active');
-                });
             });
         });
     </script>
